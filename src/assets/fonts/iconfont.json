@@ -1,0 +1,51 @@
+{
+  "id": "2749069",
+  "name": "eff",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "23529138",
+      "name": "搜索",
+      "font_class": "sousuo",
+      "unicode": "e854",
+      "unicode_decimal": 59476
+    },
+    {
+      "icon_id": "23532860",
+      "name": "菜单",
+      "font_class": "caidan",
+      "unicode": "e866",
+      "unicode_decimal": 59494
+    },
+    {
+      "icon_id": "23532869",
+      "name": "公告",
+      "font_class": "gonggao",
+      "unicode": "e867",
+      "unicode_decimal": 59495
+    },
+    {
+      "icon_id": "23532871",
+      "name": "切换",
+      "font_class": "qiehuan",
+      "unicode": "e868",
+      "unicode_decimal": 59496
+    },
+    {
+      "icon_id": "23532873",
+      "name": "配置",
+      "font_class": "peizhi",
+      "unicode": "e869",
+      "unicode_decimal": 59497
+    },
+    {
+      "icon_id": "23570266",
+      "name": "猫咪",
+      "font_class": "maomi",
+      "unicode": "e619",
+      "unicode_decimal": 58905
+    }
+  ]
+}
