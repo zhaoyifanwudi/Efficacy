@@ -38,5 +38,17 @@ axios.interceptors.response.use((response) => {
     // Message.error(res.data.message);
     return Promise.reject(error);
   });
-
+  //TODO
+  // .directive('loadmore', {
+  //   bind(el, binding) {
+  //     const selectWrap = el.querySelector('.tableScroll')
+  //     selectWrap.addEventListener('scroll', function() {
+  //       let sign = 100
+  //       const scrollDistance = this.scrollHeight - this.scrollTop - this.clientHeight
+  //       if (scrollDistance <= sign) {
+  //         binding.value()
+  //       }
+  //     })
+  //   }
+  // })
 createApp(App).use(store).use(VueContextMenu).use(router).use(VueAxios, axios).use(ElementPlus).directive('loading', loadingDirective).directive('no-result', noResultDirective).mount('#app')

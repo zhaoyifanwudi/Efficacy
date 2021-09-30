@@ -1,323 +1,575 @@
 <template>
-    <div class="investigation" v-loading = "!tableData.length">
-        <el-backtop></el-backtop>
-        <div class="button clearfix">
-            <el-button type="primary" icon="el-icon-circle-plus-outline" @click="addques">新建问卷调查表</el-button>
-            <el-button type="primary" icon="el-icon-circle-plus">新建问卷类别</el-button>
-            <el-input v-model="search" placeholder="请输入问卷名称搜索" class="name"></el-input>
-        </div>
-        <div class="quesList">
-            <el-table
-                :data="tableData.filter(data => !search || data.name.toLowerCase().includes(search.toLowerCase()))"
-                border
-                style="width: 100%"
-                max-height="445"
-            >
-                <el-table-column
-                    fixed
-                    prop="id"
-                    label="Id"
-                    width="50"
-                >
-                </el-table-column>
-                <el-table-column
-                    fixed
-                    prop="name"
-                    label="问卷名称"
-                    width="200"
-                >
-                </el-table-column>
-                <el-table-column
-                    prop="cate"
-                    label="问卷类别"
-                    width="200"
-                >
-                </el-table-column>
-                <el-table-column
-                    prop="set"
-                    label="问卷创建人"
-                    width="190"
-                >
-                </el-table-column>
-                <el-table-column
-                    prop="group"
-                    label="问卷群体"
-                    width="190"
-                >
-                </el-table-column>
-                <el-table-column
-                    prop="time"
-                    label="问卷创建时间"
-                    width="180"
-                >
-                </el-table-column>
-                <el-table-column
-                    label="操作"
-                    width="300"
-                    fixed="right"
-                >
-                    <template #default="scope">
-                        <el-button @click="browse(scope.row)" type="text" size="small">浏览</el-button>
-                        <el-button @click="release(scope.row)" type="text" size="small">发布</el-button>
-                        <el-button type="text" size="small" @click="edit(scope.row)">修改</el-button>
-                        <el-button type="text" size="small" @click="deleteNow(scope.row)">删除</el-button>
-                        <el-button type="text" size="small" @click="copy(scope.row)">复制</el-button>
-                        <el-button type="text" size="small" @click="hold(scope.row)">保存至模板</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </div>
-        <div class="nowques" v-show="showNowQues" id="nowques">
-             <el-container>
-                <el-header>
-                    <i class="el-icon-s-operation"></i>
-                    {{ nowName }}
-                </el-header>
-                <el-container class="container">
-                    <el-aside width="200px">
-                        <el-tree
-                            :data="data"
-                            node-key="id"
-                            :props="defaultProps"
-                            @node-click="handleNodeClick"
-                            @node-contextmenu="rightClick"
-                            default-expand-all
-                            :expand-on-click-node="false"
-                            id="el-tree"
-                        >
-                        </el-tree>
-                            <!--鼠标右键菜单栏 -->
-                        <div v-show="showRightMenu">
-                            <ul id="menu" class="right-menu">
-                                <li class="menu-item" @click="addDevHandle">
-                                    <i class="el-icon-circle-plus-outline"></i>
-                                    添加新模板
-                                </li>
-                                <li class="menu-item" @click="editDevHandle">
-                                    <i class="el-icon-circle-plus"></i>
-                                    清除模板
-                                </li>
-                            </ul>
+    <div class="investigation">
+        <el-container class="container">
+            <el-aside width="240px" :style="{ height: windowHeight + 'px' }">
+                <el-scrollbar>
+                    <el-tree
+                        :data="data"
+                        node-key="id"
+                        :props="defaultProps"
+                        @node-click="handleNodeClick"
+                        @node-contextmenu="rightClick"
+                        default-expand-all
+                        :expand-on-click-node="false"
+                        id="el-tree"
+                    >
+                        <template #default="{ node, data }">
+                            <span class="custom-tree-node" @click="toContent(node)">
+                                <span>
+                                    <i :class="data.icon" class="icon"></i>
+                                    <span>{{ node.label }}</span>
+                                </span>
+                            </span>
+                        </template>
+                    </el-tree>
+                </el-scrollbar>
+                    <!--鼠标右键菜单栏 -->
+                <div v-show="showRightMenua">
+                    <ul id="menua" class="right-menu right-menu-height-small">
+                        <li class="menu-item" @click="addDevHandle">
+                            <i class="el-icon-circle-plus-outline"></i>
+                            新建问卷
+                        </li>
+                        <li class="menu-item" @click="editDevHandle">
+                            <i class="el-icon-circle-plus"></i>
+                            清除模板
+                        </li>
+                    </ul>
+                </div>
+                <div v-show="showRightMenub">
+                    <ul id="menub" class="right-menu right-menu-height-max">
+                        <li class="menu-item" @click="addSubSystemHandle">
+                            <i class="el-icon-circle-plus-outline"></i>
+                            添加子系统
+                        </li>
+                        <li class="menu-item" @click="addequipmentHandle">
+                            <i class="el-icon-circle-plus"></i>
+                            添加装备
+                        </li>
+                        <li class="menu-item" @click="issueQues">
+                            <i class="el-icon-circle-close"></i>
+                            发布问卷
+                        </li>
+                        <li class="menu-item" @click="delDevHandle">
+                            <i class="el-icon-circle-close"></i>
+                            清除所有
+                        </li>
+                    </ul>
+                </div>
+                <div v-show="showRightMenuc">
+                    <ul id="menuc" class="right-menu right-menu-height-middle">
+                        <li class="menu-item" @click="addSubSystemHandle">
+                            <i class="el-icon-circle-plus-outline"></i>
+                            添加子系统
+                        </li>
+                        <li class="menu-item" @click="addequipmentHandle">
+                            <i class="el-icon-circle-plus"></i>
+                            添加装备
+                        </li>
+                        <li class="menu-item" @click="delDevHandle">
+                            <i class="el-icon-circle-close"></i>
+                            清除所有
+                        </li>
+                    </ul>
+                </div>
+                <div v-show="showRightMenud">
+                    <ul id="menud" class="right-menu right-menu-height-min">
+                        <li class="menu-item" @click="delNowItem">
+                            <i class="el-icon-circle-close"></i>
+                            删除
+                        </li>
+                    </ul>
+                </div>
+            </el-aside>
+            <el-main :style="{ height: windowHeight + 'px' }">
+                <el-empty description="暂无数据" v-if="showEmpty"></el-empty>
+                <div class="content" v-else>
+                    <div class="leftCon">
+                        <div class="leftConHeader">
+                            <div class="conButton clearfix">
+                                <el-button type="primary" icon="el-icon-circle-plus-outline" @click="addEvaluationItem">增加评价项</el-button>
+                                <el-button type="primary" icon="el-icon-circle-plus" class="buttonLeft" @click="deleteEvaluationItem">删除评价项</el-button>
+                            </div>
+                            <div class="leftConHeaderRight">
+                                <i class="el-icon-warning"></i>
+                                双击编辑评价项
+                            </div>
                         </div>
-                    </el-aside>
-                    <el-main :style="{ height: windowHeight + 'px' }">
-                        <el-empty description="暂无数据"></el-empty>
-                    </el-main>
-                </el-container>
-            </el-container>
-        </div>
+                        <div class="temTable">
+                            <el-table :data="temData.temTableData" style="width: 100%" border :max-height="tableHeight" @row-dblclick="dblclick">
+                                <el-table-column type="selection" width="55" align="center"> </el-table-column>
+                                <el-table-column prop="name" label="序号" min-width="180"> </el-table-column>
+                                <el-table-column prop="desc" label="描述" min-width="300"> </el-table-column>
+                            </el-table>
+                        </div>
+                    </div>
+                    <div class="temDesc">
+                        <el-popover
+                            placement="top-start"
+                            :width="250"
+                            trigger="hover"
+                            :content="temData.outline"
+                        >
+                            <template #reference>
+                                <el-card shadow="always" class="descCard">
+                                    <div class="cardCon">
+                                        大纲对应项目：{{temData.outline}} 
+                                    </div>
+                                </el-card>
+                            </template>
+                        </el-popover>
+                        <el-popover
+                            placement="top-start"
+                            :width="250"
+                            trigger="hover"
+                            :content="temData.KeyTest"
+                        >
+                            <template #reference>
+                                <el-card shadow="always" class="descCard">
+                                    <div class="cardCon">
+                                        重点考核试验：{{temData.KeyTest}}
+                                    </div>
+                                </el-card>
+                            </template>
+                        </el-popover>   
+                        <el-popover
+                            placement="top-start"
+                            :width="250"
+                            trigger="hover"
+                            :content="temData.detailedDescription"
+                        >
+                            <template #reference>
+                                <el-card shadow="always" class="descCard">
+                                    <div class="cardCon">
+                                        问题详细说明：{{temData.detailedDescription}}
+                                    </div>
+                                </el-card>
+                            </template>
+                        </el-popover>
+                        <el-popover
+                            placement="top-start"
+                            :width="250"
+                            trigger="hover"
+                            :content="temData.FillingInstructions"
+                        >
+                            <template #reference>
+                                <el-card shadow="always" class="descCard">
+                                    <div class="cardCon">
+                                        填表说明：{{temData.FillingInstructions}}
+                                    </div>
+                                </el-card>
+                            </template>
+                        </el-popover>
+                        
+                    </div>
+                </div>
+            </el-main>
+        </el-container>
         <el-dialog
-            title="提示"
-            v-model="dialogVisible"
+            title="新建问卷"
+            v-model="temDialog"
             width="30%"
             :before-close="handleClose"
+            center
         >
             <span>
-                <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+                <el-form :model="ruleForm_a" :rules="rules" ref="ruleForm_a" label-width="100px" class="demo-ruleForm">
                     <el-form-item label="问卷名称" prop="name" class="form" required>
-                        <el-input v-model="ruleForm.name" placeholder="请输入问卷名称"></el-input>
+                        <el-input v-model="ruleForm_a.name" placeholder="请输入问卷名称"></el-input>
                     </el-form-item>
                     <el-form-item label="创建人" required class="form" prop="user">
-                        <el-input placeholder="请输入创建人" v-model="ruleForm.user"></el-input>
+                        <el-input placeholder="请输入创建人" v-model="ruleForm_a.user"></el-input>
                     </el-form-item>
                     <el-form-item label="问卷群体" required class="form" prop="role">
-                        <el-input placeholder="请输入问卷群体" v-model="ruleForm.role"></el-input>
+                        <el-input placeholder="请输入问卷群体" v-model="ruleForm_a.role"></el-input>
                     </el-form-item>
-                    <el-form-item label="问卷类别" prop="cate" required>
-                        <el-select v-model="ruleForm.cate" placeholder="请选择类别">
-                            <el-option label="武器" value="operation"></el-option>
-                            <el-option label="头盔" value="admin"></el-option>
-                            <el-option label="防弹衣" value="expert"></el-option>
+                    <el-form-item label="引用模板" prop="cate" required>
+                        <el-select v-model="ruleForm_a.cate" placeholder="请选择模板">
+                            <el-option label="无" value="0"></el-option>
+                            <el-option label="全系统2021" value="1"></el-option>
+                            <el-option label="全系统2020" value="2"></el-option>
+                            <el-option label="全系统2019" value="3"></el-option>
                         </el-select>
                     </el-form-item>
                 </el-form>
             </span>
             <template #footer>
                 <span class="dialog-footer">
-                <el-button @click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="add">新 建</el-button>
+                <el-button @click="resetForm('ruleForm_a')" class="buttonRight">取 消</el-button>
+                <el-button type="primary" @click="addQues">新 建</el-button>
+                </span>
+            </template>
+        </el-dialog>
+        <!-- <el-dialog
+            title="添加新模板"
+            v-model="temDialog"
+            width="30%"
+            center
+        >
+            <div class="note">
+                <el-form :model="ruleForm_a" ref="ruleForm_a" label-width="100px" class="demo-ruleForm">
+                    <el-form-item label="编号" prop="id" class="form" required>
+                        <el-input v-model="ruleForm_a.id" placeholder="请输入编号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="模板名称" class="form" prop="name" required>
+                        <el-input placeholder="请输入模板名称" v-model="ruleForm_a.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="创建人员" class="form" prop="user" required>
+                        <el-input placeholder="请输入创建人员" v-model="ruleForm_a.user"></el-input>
+                    </el-form-item>
+                    <el-form-item label="说明" class="form" prop="desc" required>
+                        <el-input placeholder="请输入说明" v-model="ruleForm_a.desc"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <template #footer>
+                <span class="dialog-footer">
+                 <el-button @click="resetForm('ruleForm_a')">重 置</el-button>
+                <el-button type="primary" @click="addTem" class="buttomMargin">添 加</el-button>
+                </span>
+            </template>
+        </el-dialog> -->
+        <el-dialog
+            title="添加子系统"
+            v-model="temDialog_a"
+            width="30%"
+            center
+        >
+            <div class="note">
+                <el-form :model="ruleForm_b" ref="ruleForm_b" label-width="100px" class="demo-ruleForm">
+                    <el-form-item label="编号" prop="id" class="form" required>
+                        <el-input v-model="ruleForm_b.id" placeholder="请输入编号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="模板名称" class="form" prop="name" required>
+                        <el-input placeholder="请输入子系统名称" v-model="ruleForm_b.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="创建人员" class="form" prop="user" required>
+                        <el-input placeholder="请输入创建人员" v-model="ruleForm_b.user"></el-input>
+                    </el-form-item>
+                    <el-form-item label="说明" class="form" prop="desc" required>
+                        <el-input placeholder="请输入说明" v-model="ruleForm_b.desc"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <template #footer>
+                <span class="dialog-footer">
+                 <el-button @click="resetForm('ruleForm_b')" class="buttonRight">重 置</el-button>
+                <el-button type="primary" @click="addSubSystem">添 加</el-button>
                 </span>
             </template>
         </el-dialog>
         <el-dialog
-            title="提示"
-            v-model="dialogVisible_a"
+            title="添加装备"
+            v-model="temDialog_b"
             width="30%"
-            :before-close="handleClose"
+            center
         >
-            <span>
-                <el-form :model="ruleForm_a" :rules="rules_a" ref="ruleForm_a" label-width="100px" class="demo-ruleForm">
-                    <el-form-item label="问卷名称" prop="name" class="form" required>
-                        <el-input v-model="ruleForm_a.name" placeholder="ruleForm_a.name"></el-input>
+            <div class="note">
+                <el-form :model="ruleForm_c" ref="ruleForm_c" label-width="100px" class="demo-ruleForm">
+                    <el-form-item label="编号" prop="id" class="form" required>
+                        <el-input v-model="ruleForm_c.id" placeholder="请输入编号"></el-input>
                     </el-form-item>
-                    <el-form-item label="创建人" required class="form" prop="user">
-                        <el-input placeholder="请输入创建人" v-model="ruleForm_a.user"></el-input>
+                    <el-form-item label="装备名称" class="form" prop="name" required>
+                        <el-input placeholder="请输入装备名称" v-model="ruleForm_c.name"></el-input>
                     </el-form-item>
-                    <el-form-item label="发布时间" required class="form" prop="time">
-                        <el-input placeholder="ruleForm_a.time" v-model="ruleForm_a.time"></el-input>
+                    <el-form-item label="创建人员" class="form" prop="user" required>
+                        <el-input placeholder="请输入创建人员" v-model="ruleForm_c.user"></el-input>
                     </el-form-item>
-                    <el-form-item label="发布单位" required class="form" prop="unit">
-                        <el-input placeholder="请输入发布单位" v-model="ruleForm_a.unit"></el-input>
-                    </el-form-item>
-                    <el-form-item label="编写人员" required class="form" prop="aim">
-                        <el-input placeholder="请输入编写人员" v-model="ruleForm_a.aim"></el-input>
+                    <el-form-item label="说明" class="form" prop="desc" required>
+                        <el-input placeholder="请输入说明" v-model="ruleForm_c.desc"></el-input>
                     </el-form-item>
                 </el-form>
-            </span>
+            </div>
             <template #footer>
                 <span class="dialog-footer">
-                <el-button @click="dialogVisible_a = false">导 出</el-button>
-                <el-button type="primary" @click="dialogVisible_a = false">发 布</el-button>
+                <el-button @click="resetForm('ruleForm_c')" class="buttonRight">重 置</el-button>
+                <el-button type="primary" @click="addequipment">添 加</el-button>
+                </span>
+            </template>
+        </el-dialog>
+        <el-dialog
+            title="增加评价项"
+            v-model="temDialog_c"
+            width="30%"
+            center
+        >
+            <div class="note">
+                <el-form :model="ruleForm_d" ref="ruleForm_d" label-width="100px" class="demo-ruleForm">
+                    <el-form-item label="序号" prop="name" class="form" required>
+                        <el-input v-model="ruleForm_d.name" placeholder="请输入编号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="描述" class="form" prop="desc" required>
+                        <el-input placeholder="请输入装备名称" v-model="ruleForm_d.desc"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <template #footer>
+                <span class="dialog-footer">
+                <el-button @click="resetForm('ruleForm_d')" class="buttonRight">重 置</el-button>
+                <el-button type="primary" @click="addEvaluation">增 加</el-button>
+                </span>
+            </template>
+        </el-dialog>
+        <el-dialog
+            title="发布"
+            v-model="temDialog_d"
+            width="30%"
+            :before-close="handleClose"
+            center
+        >
+            <div class="note">
+                <el-form :model="ruleForm_e" :rules="rules_e" ref="ruleForm_e" label-width="100px" class="demo-ruleForm">
+                    <el-form-item label="问卷名称" prop="name" class="form" required>
+                        <el-input v-model="ruleForm_e.name" :placeholder="ruleForm_e.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="创建人" required class="form" prop="user">
+                        <el-input placeholder="请输入创建人" v-model="ruleForm_e.user"></el-input>
+                    </el-form-item>
+                    <el-form-item label="发布单位" required class="form" prop="unit">
+                        <el-input placeholder="请输入发布单位" v-model="ruleForm_e.unit"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <template #footer>
+                <span class="dialog-footer">
+                <el-button @click="temDialog_d = false" class="buttonRight">导 出</el-button>
+                <el-button type="primary" @click="temDialog_d = false">发 布</el-button>
+                </span>
+            </template>
+        </el-dialog>
+        <el-dialog
+            title="修改评价项"
+            v-model="temDialog_e"
+            width="30%"
+            center
+        >
+            <div class="note">
+                <el-form :model="ruleForm_f" ref="ruleForm_f" label-width="100px" class="demo-ruleForm">
+                    <el-form-item label="序号" prop="name" class="form" required>
+                        <el-input v-model="ruleForm_f.name" placeholder="ruleForm_f.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="描述" class="form" prop="desc" required>
+                        <el-input placeholder="ruleForm_f.desc" v-model="ruleForm_f.desc"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <template #footer>
+                <span class="dialog-footer">
+                 <el-button @click="resetForm('ruleForm_e')" class="buttonRight">重 置</el-button>
+                <el-button type="primary" @click="updataItem">修 改</el-button>
                 </span>
             </template>
         </el-dialog>
     </div>
-    
 </template>
 <script>
 export default {
     name: 'investigation',
+    components: {
+        
+    },
     data() {
         const data = [{
-            id: 1,
-            icon: 'el-icon-s-operation',
-            label: '问卷调查表模板',
-            obj: 1, 
-            children: [{
-                id: 2,
+                id: 1,
+                icon: 'el-icon-s-operation',
+                label: '主观问卷列表',
+                obj: 1, 
+                children: [{
+                    id: 1,
+                    label: '1789团2021年装备调查',
+                    icon: 'el-icon-s-operation',
+                    obj: 2, 
+                    children: [{
+                        id: 1,
+                        label: '全系统',
+                        icon: 'el-icon-s-operation',
+                        obj: 3, 
+                        children: [{
+                            id: 7,
+                            label: '全系统',
+                            icon: 'el-icon-s-claim',
+                            obj: 4, 
+                        }]
+                    },{
+                        id: 2,
+                        label: '头戴装备',
+                        icon: 'el-icon-s-operation',
+                        obj: 3, 
+                        children: [{
+                            id: 1,
+                            label: '头盔',
+                            icon: 'el-icon-s-claim',
+                            obj: 4, 
+                        },{
+                            id: 2,
+                            label: '防护眼镜',
+                            icon: 'el-icon-s-claim',
+                            obj: 4, 
+                        }]
+                    },{
+                        id: 3,
+                        label: '身背装备',
+                        icon: 'el-icon-s-operation',
+                        obj: 3, 
+                        children: [{
+                            label: '携行具',
+                            icon: 'el-icon-s-operation',
+                            obj: 3, 
+                            children: [{
+                                id: 10,
+                                label: '生活背囊',
+                                icon: 'el-icon-s-claim',
+                                obj: 4, 
+                            },{
+                                id: 11,
+                                label: '突击背包',
+                                icon: 'el-icon-s-claim',
+                                obj: 4, 
+                            },{
+                                id: 12,
+                                label: '作战背心',
+                                icon: 'el-icon-s-claim',
+                                obj: 4, 
+                            }]
+                        }]
+                    },{
+                        id: 6,
+                        label: '手持装备',
+                        icon: 'el-icon-s-operation',
+                        obj: 3, 
+                        children: [{
+                            id: 13,
+                            label: '电子战术握把',
+                            icon: 'el-icon-s-claim',
+                            obj: 4, 
+                        }]
+                    },]
+                }]
+            }]
+        const temListData = [{
+                id: 1,
                 label: '202010全系统',
                 icon: 'el-icon-s-operation',
                 obj: 2, 
                 children: [{
-                    id: 3,
+                    id: 1,
                     label: '全系统',
                     icon: 'el-icon-s-operation',
                     obj: 3, 
                     children: [{
                         id: 7,
                         label: '全系统',
-                        icon: 'el-icon-s-operation',
+                        icon: 'el-icon-s-claim',
                         obj: 4, 
                     }]
                 },{
-                    id: 4,
+                    id: 2,
                     label: '头戴装备',
                     icon: 'el-icon-s-operation',
+                    obj: 3, 
                     children: [{
-                        id: 8,
+                        id: 1,
                         label: '头盔',
-                        icon: 'el-icon-s-operation'
+                        icon: 'el-icon-s-claim',
+                        obj: 4, 
                     },{
-                        id: 9,
+                        id: 2,
                         label: '防护眼镜',
-                        icon: 'el-icon-s-operation',
+                        icon: 'el-icon-s-claim',
+                        obj: 4, 
                     }]
                 },{
-                    id: 5,
+                    id: 3,
                     label: '身背装备',
                     icon: 'el-icon-s-operation',
+                    obj: 3, 
                     children: [{
                         label: '携行具',
                         icon: 'el-icon-s-operation',
+                        obj: 3, 
                         children: [{
                             id: 10,
                             label: '生活背囊',
-                            icon: 'el-icon-s-operation',
+                            icon: 'el-icon-s-claim',
+                            obj: 4, 
                         },{
                             id: 11,
                             label: '突击背包',
-                            icon: 'el-icon-s-operation',
+                            icon: 'el-icon-s-claim',
+                            obj: 4, 
                         },{
                             id: 12,
                             label: '作战背心',
-                            icon: 'el-icon-s-operation',
+                            icon: 'el-icon-s-claim',
+                            obj: 4, 
                         }]
                     }]
                 },{
                     id: 6,
                     label: '手持装备',
                     icon: 'el-icon-s-operation',
+                    obj: 3, 
                     children: [{
                         id: 13,
                         label: '电子战术握把',
-                        icon: 'el-icon-s-operation',
+                        icon: 'el-icon-s-claim',
+                        obj: 4, 
                     }]
                 },]
             }]
-        }]
         return {
-            tableData: [
-                {
-                    id: '1',
-                    name: '202010全系统',
-                    cate: '赵一凡1',
-                    set: '202010',
-                    group: '武器问卷',
-                    time: '2021.08.19'
-                },{
-                    id: '1',
-                    name: '202080',
-                    cate: '赵一凡',
-                    set: '202010',
-                    group: '武器问卷',
-                    time: '2021.08.19'
-                },{
-                    id: '1',
-                    name: '202070',
-                    cate: '赵一凡',
-                    set: '202010',
-                    group: '武器问卷',
-                    time: '2021.08.19'
-                },{
-                    id: '1',
-                    name: '202010',
-                    cate: '赵一凡',
-                    set: '202010',
-                    group: '武器问卷',
-                    time: '2021.08.19'
-                },{
-                    id: '1',
-                    name: '202010',
-                    cate: '赵一凡',
-                    set: '202010',
-                    group: '武器问卷',
-                    time: '2021.08.19'
-                },{
-                    id: '1',
-                    name: '202010',
-                    cate: '赵一凡',
-                    set: '202010',
-                    group: '武器问卷',
-                    time: '2021.08.19'
-                },{
-                    id: '1',
-                    name: '202010',
-                    cate: '赵一凡',
-                    set: '202010',
-                    group: '武器问卷',
-                    time: '2021.08.19'
-                },{
-                    id: '1',
-                    name: '202010',
-                    cate: '赵一凡',
-                    set: '202010',
-                    group: '武器问卷',
-                    time: '2021.08.19'
-                },
-            ],
+            data: JSON.parse(JSON.stringify(data)),
             defaultProps: {
                 children: 'children',
                 label: 'label'
             },
+            temListData: JSON.parse(JSON.stringify(temListData)),
+            windowHeight: document.documentElement.clientHeight - 175,
             showRightMenu: false,
-            data: JSON.parse(JSON.stringify(data)),
-            search: '',
-            showNowQues: false,
-            windowHeight: document.documentElement.clientHeight - 60,
-            nowName: '',
-            dialogVisible: false,
-            dialogVisible_a: false,
-            ruleForm: {
+            showRightMenua: false,
+            showRightMenub: false,
+            showRightMenuc: false,
+            showRightMenud: false,
+            temDialog: false,
+            temDialog_a: false,
+            temDialog_b: false,
+            temDialog_c: false,
+            temDialog_d: false,
+            temDialog_e: false,
+            tableHeight: 0,
+            tempid: {},
+            showEmpty: true,
+            temData: {
+                outline: '松紧适度 ',
+                KeyTest: '头盔的使用试验 ',
+                detailedDescription: '无 ',
+                FillingInstructions: '压力分布均匀压力分布均匀压力分布均匀压力分布均匀压力分布均匀压力分布均匀压力分布均匀压力分布均匀压力分布均匀压力分布均匀压力分布均匀压力分布均匀',
+                temTableData: [
+                    {
+                        id: 1,
+                        name: '优',
+                        desc: '压力分布均匀，不压头'
+                    },{
+                        id: 2,
+                        name: '良',
+                        desc: '压力分布较均匀，基本不压头'
+                    },{
+                        id: 3,
+                        name: '一般',
+                        desc: '略压头'
+                    },{
+                        id: 4,
+                        name: '较差',
+                        desc: '压力分布不均，压头比较严重'
+                    },{
+                        id: 5,
+                        name: '差',
+                        desc: '压力分布特别不均，压头严重'
+                    }
+                ],
+            },
+            ruleForm_a: {
+                id: '',
                 name: '',
                 user: '',
                 role: '',
@@ -334,14 +586,34 @@ export default {
                     { required: true, message: '请选择问卷群体', trigger: 'blur' }
                 ]
             },
-            ruleForm_a: {
+            ruleForm_b: {
+                id: '',
+                name: '',
+                createTime: '',
+                updateTime: '',
+                user: '',
+                desc: ''
+            },
+            ruleForm_c: {
+                id: '',
+                name: '',
+                createTime: '',
+                updateTime: '',
+                user: '',
+                desc: ''
+            },
+            ruleForm_d: {
+                id: '',
+                name: '',
+                desc: ''
+            },
+            ruleForm_e: {
                 name: '',
                 user: '',
                 time: '',
                 unit: '',
-                aim: ''
             },
-            rules_a: {
+            rules_e: {
                 aim: [
                     { required: true, message: '请输入编写人员', trigger: 'blur' },
                 ],
@@ -352,78 +624,81 @@ export default {
                     { required: true, message: '请选择发布单位', trigger: 'blur' }
                 ]
             },
+            ruleForm_f: {
+                id: '',
+                name: '',
+                desc: ''
+            }
+        }
+    },
+    // computed: {
+    //     windowHeight() {
+    //         return document.documentElement.scrollHeight - 175
+    //     }
+    // },
+    watch: {
+        windowHeight(val) {
+            this.windowHeight = val
         }
     },
     mounted() {
         window.onresize = () => {
-            this.windowHeight = document.documentElement.clientHeight - 60;
+            this.windowHeight = document.documentElement.clientHeight - 175;
         };
+        this.$nextTick(() => {
+            this.tableHeight = window.innerHeight - 390;
+            //后面的50：根据需求空出的高度，自行调整
+        })
     },
     methods: {
-        async browse(row) {
-            await this.open(row)
-            let btn = document.getElementById('nowques')
-            let x = btn.offsetTop + 158
-            let timer = setInterval(() => {
-                document.documentElement.scrollTop += 100
-                if(document.documentElement.scrollTop >= x) {
-                    clearInterval(timer)
+        dblclick(row) {
+            console.log(row)
+            this.temDialog_e = true
+            this.ruleForm_f.id = row.id
+            this.ruleForm_f.name = row.name
+            this.ruleForm_f.desc = row.desc
+        },
+        updataItem() {
+            this.temDialog_e = false
+            this.temData.temTableData.map((x) => {
+                if(x.id === this.ruleForm_f.id) {
+                    x.name = this.ruleForm_f.name
+                    x.desc = this.ruleForm_f.desc
                 }
-            }, 20);
-            let timer_1 = setInterval(() => {
-                window.pageYOffset += 100
-                if(window.pageYOffset >= x) {
-                    clearInterval(timer_1)
-                }
-            }, 20);
-            let timer_2 = setInterval(() => {
-                document.body.scrollTop += 100
-                if(document.body.scrollTop >= x) {
-                    clearInterval(timer_2)
-                }
-            }, 20);
+            })
         },
-        open(row) {
-            this.showNowQues = true
-            this.nowName = row.name
-        },
-        release(row) {
-            this.dialogVisible_a = true
-            this.ruleForm_a.name = row.name
-            let nowdata = new Date()
-            this.ruleForm_a.time = nowdata.toLocaleDateString()
-        },
-        edit(row) {
-
-        },
-        deleteNow(row) {
-
-        },
-        copy(row) {
-
-        },
-        hold(row) {
-
-        },
-        handleNodeClick() {
-
-        },
-        addques() {
-            this.dialogVisible = true
-        },
-        add() {
-            this.dialogVisible = false
-            // todo: 创建人应从vuex中获得当前用户
+        handleNodeClick(data) {
+            // console.log(data);
         },
         rightClick(event, data, node, obj) {
-            let nowheight = document.documentElement.scrollTop || document.body.scrollTop || window.pageYOffset
-            this.showRightMenu = false
+            this.showRightMenua = false
+            this.showRightMenub = false
+            this.showRightMenuc = false
+            this.showRightMenud = false
             if(node.data.obj == 1) {
                  // 先把模态框关死，目的是：第二次或者第n次右键鼠标的时候 它默认的是true
-                this.showRightMenu = true
-                let menu = document.querySelector('#menu')
-                menu.style.left = event.clientX + 'px'
-                menu.style.top = event.clientY - 5 + nowheight + 'px'
+                this.showRightMenua = true
+                let menua = document.querySelector('#menua')
+                menua.style.left = event.clientX + 'px'
+                menua.style.top = event.clientY - 5 + 'px'
+            } else if(node.data.obj == 2) {
+                this.showRightMenub = true
+                this.tempid = node
+                let menub = document.querySelector('#menub')
+                menub.style.left = event.clientX + 'px'
+                menub.style.top = event.clientY - 5 + 'px'
+            } else if(node.data.obj == 3) {
+                this.showRightMenuc = true
+                this.tempid = node
+                let menuc = document.querySelector('#menuc')
+                menuc.style.left = event.clientX + 'px'
+                menuc.style.top = event.clientY - 5 + 'px'
+            } else if(node.data.obj == 4) {
+                this.showRightMenud = true
+                this.tempid = node
+                let menud = document.querySelector('#menud')
+                menud.style.left = event.clientX + 'px'
+                menud.style.top = event.clientY - 5 + 'px'
             }
             // 给整个document添加监听鼠标事件，点击任何位置执行closeRightMenu方法，及时将菜单关闭
             document.addEventListener('click', this.closeRightMenu)
@@ -432,124 +707,276 @@ export default {
             // console.log(node)
         },
         closeRightMenu() {
-            this.showRightMenu = false
+            this.showRightMenua = false
+            this.showRightMenub = false
+            this.showRightMenuc = false
+            this.showRightMenud = false
             // 及时关掉鼠标监听事件
             document.removeEventListener('click', this.closeRightMenu)
         },
-        handleClose(done) {
-            this.$confirm('确认关闭？')
-            .then(_ => {
-                done();
+        //添加新模板--打开弹出框
+        addDevHandle() {
+            this.temDialog = true
+        },
+        //添加子系统--打开弹出框
+        addSubSystemHandle() {
+            this.temDialog_a = true
+        },
+        //添加装备--打开弹出框
+        addequipmentHandle() {
+            this.temDialog_b = true
+        },
+        editDevHandle() {
+        },
+        // 删除操作
+        delDevHandle() {
+        },
+        //重置
+        resetForm(formName) {
+            this.$refs[formName].resetFields();
+        },
+        //新增问卷
+        // id: '',
+        //         name: '',
+        //         user: '',
+        //         role: '',
+        //         cate: ''，date
+        addQues() {
+            this.temDialog = false
+            let listTemp = {}
+            listTemp.id = this.ruleForm_a.id
+            listTemp.label = this.ruleForm_a.name
+            listTemp.icon = 'el-icon-s-operation'
+            listTemp.obj = 2
+            if(this.ruleForm_a.cate === '0') {
+                listTemp.children = []
+            } else if(this.ruleForm_a.cate === '1') {
+                listTemp.children = this.temListData
+            }
+            console.log(listTemp)
+            let lens = this.data[0].children.push(listTemp)
+            console.log(lens)
+        },
+        //添加子系统
+        addSubSystem() {
+            this.temDialog_a = false
+            let listTemp = {}
+            listTemp.id = this.ruleForm_b.id
+            listTemp.label = this.ruleForm_b.name
+            listTemp.icon = 'el-icon-s-operation'
+            listTemp.obj = 2
+            listTemp.children = []
+            console.log(this.tempid)
+            let lens = this.tempid.data.children.push(listTemp)
+            console.log(lens)
+        },
+        //添加装备
+        addequipment() {
+            this.temDialog_b = false
+            let listTemp = {}
+            listTemp.id = this.ruleForm_c.id
+            listTemp.label = this.ruleForm_c.name
+            listTemp.icon = 'el-icon-s-claim'
+            let lens = this.tempid.data.children.push(listTemp)
+            console.log(lens)
+        },
+        //删除树的最后一级
+        delNowItem() {
+            console.log(this.tempid)
+            this.showEmpty = true
+            let i = 0
+            this.tempid.parent.data.children.map((x) => {
+                if(x.id === this.tempid.data.id) {
+                    this.tempid.parent.data.children.splice(i,1)
+                } else {
+                    i++
+                }
             })
-            .catch(_ => {});
+        },
+        //发布
+        issueQues() {
+            this.temDialog_d = true
+        },
+        toContent(node) {
+            if(!node.data.hasOwnProperty('children')) {
+                this.showEmpty = false
+            }
+            console.log(node)
+        },
+        addEvaluationItem() {
+            this.temDialog_c = true
+        },
+        deleteEvaluationItem() {
+
+        },
+        addEvaluation() {
+            this.temDialog_c = false
+            this.temData.temTableData.push(this.ruleForm_d)
         }
     }
 }
 </script>
 <style lang="scss" scoped>
-    .investigation {
-        width: 100%;
-        .form {
-            width: 380px;
-        }
-        .button {
+    .buttonRight {
+        margin-right: 50px;
+    }
+    .buttomMargin {
+        margin-left: 100px;
+    }
+    .icon {
+        margin-right: 1px;
+        vertical-align: middle;
+    }
+    .el-aside {
+        background-color: white;
+        color: #333;
+        text-align: center;
+        height: 100%;
+        
+    }
+
+    .el-main {
+        background-color: #E9EEF3;
+        color: #333;
+        // text-align: center;
+         .content {
             width: 100%;
+            display: flex;
+            justify-content: space-between;
+            height: 90%;
+            margin-top: 7px;
             box-sizing: border-box;
-            padding-top: 20px;
-            padding-left: 100px;
-            padding-right: 100px;
-            .name {
-                width: 300px;
-                float: right;
-            }
-        }
-        .quesList {
-            width: 100%;
-            box-sizing: border-box;
-            padding-top: 20px;
-            padding-left: 100px;
-            padding-right: 100px;
-        }
-        .nowques {
-            width: 100%;
-            box-sizing: border-box;
-            padding-top: 158px;
-            padding-left: 100px;
-            padding-right: 100px;
-            .el-header, .el-footer {
-                background-color: black;
-                color: white;
-                text-align: center;
-                line-height: 60px;
-                font-size: 16px;
-                letter-spacing: 1px;
-            }
-            .el-aside {
+            .leftCon {
+                width: 70%;       
                 background-color: white;
-                color: #333;
-                text-align: center;
-                height: 100%;
-                
-            }
-
-            .el-main {
-                background-color: #E9EEF3;
-                color: #333;
-                text-align: center;
-            }
-            .container {
-                
-            }
-            body > .el-container {
-                margin-bottom: 40px;
-            }
-
-            .el-container:nth-child(5) .el-aside,
-            .el-container:nth-child(6) .el-aside {
-                line-height: 260px;
-            }
-
-            .el-container:nth-child(7) .el-aside {
-                line-height: 320px;
-            }
-            .custom-tree-node {
-                flex: 1;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                font-size: 14px;
-                padding-right: 8px;
-            }
-            #el-tree {
-                user-select: none;
-            }
-            .right-menu {
-                z-index: 1;
-                position: absolute;
-                height: 100px;
-                width: 120px;
-                position: absolute;
-                border-radius: 5px;
-                border: 1px solid #ccc;
-                background-color: white;
-                .menu-item {
-                    //display: block;
-                    line-height: 20px;
-                    text-align: left;
-                    padding-top: 6.5px;
-                    padding-bottom: 7px;
-                    font-size: 14px;
-                    color: #606266;
+                margin-left: 15px;
+                box-sizing: border-box;
+                .leftConHeader {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-end;
+                    .conButton {
+                        box-sizing: border-box;
+                        margin-left: 15px;
+                        margin-top: 15px;
+                        .buttonLeft {
+                            margin-left: 15px;
+                        }
+                    }
+                    .leftConHeaderRight {
+                        box-sizing: border-box;
+                        margin-right: 20px;
+                        margin-top: 15px;
+                        font-size: 13px;
+                        color: $colorC;
+                    }
+                }
+                .temTable {
+                    box-sizing: border-box;
                     padding-left: 15px;
                     padding-right: 15px;
-                    cursor: pointer;
-                    box-sizing: border-box;
+                    margin-top: 25px;
+                    margin-bottom: 15px;
+                    width: 100%;
                 }
-                li:hover {
-                    background-color: #edf6ff;
-                    color: #606266;
+            }
+            .temDesc {
+                width: 25%;
+                background-color: white;
+                margin-right: 20px;
+                box-sizing: border-box;
+                .descCard {
+                    margin-top: 25px;
+                    margin-left: 20px;
+                    margin-right: 20px;
+                    font-size: 14px;
+                    box-sizing: border-box;
+                    .cardCon {
+                        box-sizing: border-box;
+                        // padding-right: 10px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
                 }
             }
         }
     }
+    .container {
+        margin-top: 1px;
+    }
+    body > .el-container {
+        margin-bottom: 40px;
+    }
+
+    .el-container:nth-child(5) .el-aside,
+    .el-container:nth-child(6) .el-aside {
+        line-height: 260px;
+    }
+
+    .el-container:nth-child(7) .el-aside {
+        line-height: 320px;
+    }
+    .custom-tree-node {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        padding-right: 8px;
+    }
+    #el-tree {
+        user-select: none;
+    }
+    .right-menu-height-small {
+        height: 67px;
+    }
+    .right-menu-height-middle {
+        height: 101px;
+    }
+    .right-menu-height-max {
+        height: 135px;
+    }
+    .right-menu-height-min {
+        height: 33px;
+    }
+    .right-menu {
+      z-index: 1;
+      position: absolute;
+      width: 120px;
+      position: absolute;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      background-color: white;
+      .menu-item {
+        //display: block;
+        line-height: 20px;
+        text-align: left;
+        padding-top: 6.5px;
+        padding-bottom: 7px;
+        font-size: 14px;
+        color: #606266;
+        padding-left: 15px;
+        padding-right: 15px;
+        cursor: pointer;
+        box-sizing: border-box;
+      }
+      li:hover {
+        background-color: #edf6ff;
+        color: #606266;
+      }
+    }
+    
+    .form {
+        width: 90%;
+    }
+    .custom-tree-node {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        padding-right: 8px;
+    }
+   
 </style>

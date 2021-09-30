@@ -22,10 +22,10 @@
                     <el-input type="textarea" v-model="ruleForm.desc"></el-input>
                 </el-form-item>
                 
-                <el-form-item>
-                    <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+                <div class="buttonType">
                     <el-button @click="resetForm('ruleForm')">重置</el-button>
-                </el-form-item>
+                    <el-button type="primary" @click="submitForm('ruleForm')" class="buttomMargin">立即创建</el-button>
+                </div>
             </el-form>
         </div>
     </div>
@@ -93,6 +93,13 @@ export default {
             height: 100%;
             .name {
                 width: 500px;
+            }
+            .buttonType {
+                margin-top: 50px;
+                text-align: center;
+                .buttomMargin {
+                    margin-left: 50px;
+                }
             }
         }
         

@@ -1,231 +1,705 @@
 <template>
-    <div id="wrap">
-        <div id="chart-wrap">
-            <div id="chart-palette"></div>
-            <div id="chart-diagram"></div>
+    <div class="make" v-loading = "!tableData.length">
+        <div class="button clearfix">
+            <el-button type="primary" icon="el-icon-circle-plus-outline" class="buttonClass" @click="addSys">新建评估指标体系</el-button>
+            <el-button type="primary" icon="el-icon-search" class="buttonClass" @click="querySys">指标体系查询</el-button>
+            <el-button type="primary" icon="el-icon-tickets" class="buttonClass" @click="showSysTem">指标体系模板</el-button>
         </div>
-        <button @click="onSubmit"></button>
+        <div class="systemList">
+            <el-table
+                :data="tableDataNow"
+                border
+                style="width: 100%"
+                ref="myTable"
+            >
+                <el-table-column
+                    fixed
+                    prop="id"
+                    label="指标体系编号"
+                    min-width="110"
+                >
+                </el-table-column>
+                <el-table-column
+                    fixed
+                    prop="name"
+                    label="指标体系名称"
+                    min-width="200"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="createTime"
+                    label="创建时间"
+                    min-width="150"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="updateTime"
+                    label="修改时间"
+                    min-width="150"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="user"
+                    label="创建人员"
+                    min-width="150"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="desc"
+                    label="说明"
+                    min-width="180"
+                >
+                </el-table-column>
+                <el-table-column
+                    label="操作"
+                    min-width="300"
+                    fixed="right"
+                >
+                    <template #default="scope">
+                        <el-button @click="browseThis(scope.row)" type="text" size="small">浏览</el-button>
+                        <el-button type="text" size="small" @click="edit(scope.row)">修改</el-button>
+                        <el-button type="text" size="small" @click="deleteNow(scope.row)">删除</el-button>
+                        <el-button type="text" size="small" @click="copy(scope.row)">复制</el-button>
+                        <el-button type="text" size="small" @click="hold(scope.row)">保存至模板</el-button>
+                    </template>
+                </el-table-column>       
+            </el-table>
+        </div>
+        <el-dialog
+            title="指标体系查询"
+            v-model="dialogVisible_a"
+            width="30%"
+            center
+        >
+            <div class="note">
+                <el-form :model="ruleForm_a" ref="ruleForm_a" label-width="100px" class="demo-ruleForm">
+                    <el-form-item label="编号" prop="id" class="form">
+                        <el-input v-model="ruleForm_a.id" placeholder="请输入编号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="模板名称" class="form" prop="name">
+                        <el-input placeholder="请输入模板名称" v-model="ruleForm_a.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="创建时间" class="form" prop="createTime">
+                        <el-input placeholder="请输入创建时间" v-model="ruleForm_a.createTime"></el-input>
+                    </el-form-item>
+                    <el-form-item label="修改时间" class="form" prop="updateTime">
+                        <el-input placeholder="请输入修改时间" v-model="ruleForm_a.updateTime"></el-input>
+                    </el-form-item>
+                    <el-form-item label="创建人员" class="form" prop="user">
+                        <el-input placeholder="请输入创建人员" v-model="ruleForm_a.user"></el-input>
+                    </el-form-item>
+                    <el-form-item label="说明" class="form" prop="desc">
+                        <el-input placeholder="请输入说明" v-model="ruleForm_a.desc"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <template #footer>
+                <span class="dialog-footer">
+                 <el-button @click="resetForm('ruleForm_a')">重 置</el-button>
+                <el-button type="primary" @click="query"  class="buttomMargin">查 询</el-button>
+                </span>
+            </template>
+        </el-dialog>
+        <el-dialog
+            title="指标体系查询结果"
+            v-model="dialogVisible_b"
+            width="90%"
+            center
+        >
+            <div class="systemList listHeight">
+                <el-table
+                    :data="tableData"
+                    border
+                    style="width: 100%"
+                    ref="myTableResult"
+                    max-height="450"
+                >
+                    <el-table-column
+                        fixed
+                        prop="id"
+                        label="指标体系编号"
+                        min-width="110"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        fixed
+                        prop="name"
+                        label="指标体系名称"
+                        min-width="200"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="createTime"
+                        label="创建时间"
+                        min-width="150"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="updateTime"
+                        label="修改时间"
+                        min-width="150"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="user"
+                        label="创建人员"
+                        min-width="150"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="desc"
+                        label="说明"
+                        min-width="180"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        label="操作"
+                        min-width="300"
+                        fixed="right"
+                    >
+                        <template #default="scope">
+                            <el-button @click="browseThis(scope.row)" type="text" size="small">浏览</el-button>
+                            <el-button type="text" size="small" @click="edit(scope.row)">修改</el-button>
+                            <el-button type="text" size="small" @click="deleteNow(scope.row)">删除</el-button>
+                            <el-button type="text" size="small" @click="copy(scope.row)">复制</el-button>
+                        </template>
+                    </el-table-column>       
+                </el-table>
+            </div>
+        </el-dialog>
+        <el-dialog
+            title="新建评估指标体系"
+            v-model="dialogVisible_c"
+            width="30%"
+            center
+        >
+            <div class="note">
+                <el-form :model="ruleForm_b" ref="ruleForm_b" label-width="100px" class="demo-ruleForm">
+                    <el-form-item label="体系编号" prop="id" class="form" required>
+                        <el-input v-model="ruleForm_b.id" placeholder="请输入编号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="体系模板" prop="value" class="form" required>
+                        <el-select v-model="ruleForm_b.value" placeholder="无">
+                            <el-option
+                                v-for="item in options"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value"
+                            >
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    
+                    <el-form-item label="体系名称" class="form" prop="name" required>
+                        <el-input placeholder="请输入名称" v-model="ruleForm_b.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="体系说明" class="form" prop="desc" required>
+                        <el-input placeholder="请输入说明" v-model="ruleForm_b.desc"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <template #footer>
+                <span class="dialog-footer">
+                 <el-button @click="resetForm('ruleForm_b')">重 置</el-button>
+                <el-button type="primary" @click="addNewSys" class="buttomMargin">新 建</el-button>
+                </span>
+            </template>
+        </el-dialog>
+        <el-dialog
+            title="评估指标体系模板"
+            v-model="dialogVisible_d"
+            width="90%"
+            center
+        >
+            <div class="systemList listHeight">
+                <el-table
+                    :data="tableData"
+                    border
+                    style="width: 100%"
+                    ref="myTableResult"
+                    max-height="450"
+                >
+                    <el-table-column
+                        fixed
+                        prop="id"
+                        label="体系模板编号"
+                        min-width="110"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        fixed
+                        prop="name"
+                        label="体系模板名称"
+                        min-width="200"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="createTime"
+                        label="创建时间"
+                        min-width="150"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="updateTime"
+                        label="修改时间"
+                        min-width="150"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="user"
+                        label="创建人员"
+                        min-width="150"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        prop="desc"
+                        label="说明"
+                        min-width="180"
+                    >
+                    </el-table-column>
+                    <el-table-column
+                        label="操作"
+                        min-width="300"
+                        fixed="right"
+                    >
+                        <template #default="scope">
+                            <el-button @click="browseThis(scope.row)" type="text" size="small">浏览</el-button>
+                            <el-button type="text" size="small" @click="edit(scope.row)">修改</el-button>
+                            <el-button type="text" size="small" @click="deleteNow(scope.row)">删除</el-button>
+                            <el-button type="text" size="small" @click="copy(scope.row)">引用</el-button>
+                        </template>
+                    </el-table-column>       
+                </el-table>
+            </div>
+        </el-dialog>
     </div>
 </template>
 <script>
-import go from 'gojs'
-const MAKE = go.GraphObject.make;
 export default {
     name: 'make',
     data() {
-        return {}
+        return {
+            tableData: [
+                {
+                    id: 'QXT202101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QXT202101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QXT202101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QXT202101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QXT202101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QXT202101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QXT202101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QXT202101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QXT202101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QXT202101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QX101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QX01',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'Q01',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QX01',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'Q1',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'Q01',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QX01',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QX01',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QXT101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QXT1',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QX101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QX101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QX01',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QXT01',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QXT201',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QX101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QX101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QX101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QXT01',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QXT01',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QXT201',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QX2101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+                {
+                    id: 'QX02101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QXT2101',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'QX1',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },{
+                    id: 'Q',
+                    name: '全系统评估指标体系2021',
+                    createTime: '2020.10.10',
+                    updateTime: '2020.10.10',
+                    user: '李四',
+                    desc: '全系统',
+                },
+            ],
+            options: [
+                {
+                    value: '',
+                    label: '无',
+                },
+                {
+                    value: 'Option1',
+                    label: '模板1',
+                },
+                {
+                    value: 'Option2',
+                    label: '模板2',
+                },
+                {
+                    value: 'Option3',
+                    label: '模板3',
+                },
+                {
+                    value: 'Option4',
+                    label: '模板4',
+                },
+            ],
+            tableDataNow: [],
+            currentPage: 1,
+            pageSize: 15,
+            totalPage: 0,
+            dialogVisible_a: false,
+            dialogVisible_b: false,
+            dialogVisible_c: false,
+            dialogVisible_d: false,
+            ruleForm_a: {
+                id: '',
+                name: '',
+                createTime: '',
+                updateTime: '',
+                user: '',
+                desc: ''
+            },
+            ruleForm_b: {
+                id: '',
+                name: '',
+                createTime: '',
+                updateTime: '',
+                user: '',
+                desc: '',
+                value: ''
+            },
+        }
+    },
+    created() {
+        this.totalPage = this.tableData.length / this.pageSize
+        this.loadData()
     },
     mounted() {
-        var mySelf = this;
-        mySelf.myDiagram = MAKE(go.Diagram, "chart-diagram", {
-            initialContentAlignment: go.Spot.Center, // 居中显示
-            "undoManager.isEnabled": true, // 支持 Ctrl-Z 和 Ctrl-Y 操作
-            "toolManager.hoverDelay": 100, //tooltip提示显示延时
-            "toolManager.toolTipDuration": 10000, //tooltip持续显示时间
-            //isReadOnly:true,//只读
-            "grid.visible": true, //显示网格
-            allowMove: true, //允许拖动
-            // allowDragOut:true,
-            allowDelete: true,
-            allowCopy: true,
-            allowClipboard: true,
-            "toolManager.mouseWheelBehavior": go.ToolManager.WheelZoom, //有鼠标滚轮事件放大和缩小，而不是向上和向下滚动
-            layout: MAKE(go.TreeLayout, {
-                angle: 0,
-                layerSpacing: 35
-            })
-        }); //构建gojs对象
-        console.log(mySelf.myDiagram);
-        mySelf.myDiagram.addDiagramListener("ObjectSingleClicked", function(e) {
-            debugger
-            console.log(e.subject.part);
-
-        });
-
-        mySelf.myDiagram.addDiagramListener("BackgroundSingleClicked", function(e) {
-            debugger
-            console.log("Double-clicked at" + e.diagram.lastInput.documentPoint);
-        });
-
-        mySelf.myDiagram.addDiagramListener("ClipboardPasted", function(e) {
-            debugger
-            console.log("Pasted" + e.diagram.selection.count + "parts");
-        });
-
-        mySelf.myDiagram.linkTemplate = MAKE(go.Link, {
-                curve: go.Link.Bezier
-            }, // 贝塞尔曲线
-            {
-                routing: go.Link.Orthogonal,
-                corner: 15
-            },
-            MAKE(go.Shape, {
-                strokeWidth: 2,
-                stroke: "#F60"
-            }),
-            MAKE(go.Shape, {
-                toArrow: "Standard",
-                fill: "red",
-                stroke: "blue"
-            }), //箭头
-            MAKE(go.TextBlock, {
-                    margin: 20,
-                    stroke: "blue",
-                    font: "14px sans-serif",
-                    width: 50,
-                    wrap: go.TextBlock.WrapDesiredSize
-                },
-                new go.Binding("text", "linktext")), {
-                toolTip: MAKE(go.Adornment, "Auto",
-                    MAKE(go.Shape, {
-                        fill: "#FFFFCC"
-                    }),
-                    MAKE(go.TextBlock, {
-                        margin: 4
-                    }, new go.Binding("text", "name1"))
-                ) // end of Adornment
-            }
-        );
-        let myModel = MAKE(go.GraphLinksModel); //也可以创建link model;需要配置myModel.linkDataArray 如下
-        myModel.nodeDataArray = [];
-        myModel.linkDataArray = [];
-
-        var lightText = "whitesmoke";
-        mySelf.myDiagram.nodeTemplateMap.add(
-            "Next",
-            MAKE(
-                go.Node,
-                "Spot",
-                // nodeStyle(),
-                MAKE( //声明创建一个新的面板对象,自定义方式可参考mySelf.myDiagram.nodeTemplate
-                    go.Panel, //表明需要创建一个panel面板对象
-                    "Auto", //页面布局为自动
-                    MAKE( //声明构建一个圆角矩形
-                        go.Shape,
-                        "RoundedRectangle", {
-                            fill: "#44CCFF",
-                            stroke: '#FFF',
-                            strokeWidth: 1,
-                            angle: 0
-                        },
-                        new go.Binding("figure", "figure") //声明并创建一个新的图形
-                    ),
-                    MAKE( //声明一个可编辑文本域
-                        go.TextBlock, {
-                            font: "12pt Helvetica, Arial, sans-serif",
-                            stroke: lightText,
-                            width: 125,
-                            maxSize: new go.Size(360, NaN),
-                            wrap: go.TextBlock.WrapFit, //文本域换行
-                            editable: true, //是否可编辑
-                            margin: 12,
-                            wrap: go.TextBlock.WrapDesiredSize
-                        },
-                        new go.Binding("text").makeTwoWay()
-                    )
-                ),
-                // four named ports, one on each side:
-                makePort("T", go.Spot.Top, false, true),
-                makePort("L", go.Spot.Left, true, true),
-                makePort("R", go.Spot.Right, true, true),
-                makePort("B", go.Spot.Bottom, true, false)
-            )
-        );
-
-        //Node连接线
-        function makePort(name, spot, output, input) {
-            return MAKE(go.Shape, "Circle", {
-                fill: "transparent",
-                stroke: null, // this is changed to "white" in the showPorts function
-                desiredSize: new go.Size(10, 10),
-                alignment: spot,
-                alignmentFocus: spot, // align the port on the main Shape
-                portId: name, // declare this object to be a "port"
-                fromSpot: spot,
-                toSpot: spot, // declare where links may connect at this port
-                fromLinkable: output,
-                toLinkable: input, // declare whether the user may draw links to/from here
-                cursor: "pointer" // show a different cursor to indicate potential link point
-            });
-        };
-        mySelf.myDiagram.model = myModel;
-        mySelf.init();
+        // this.tableListener()
+        document.addEventListener('scroll',this.scrollLoad)
     },
     methods: {
-        onSubmit() {
+        showSysTem() {
+            this.dialogVisible_d = true
+            
+        },
+        addNewSys() {
+            this.dialogVisible_c = false
+            this.ruleForm_b.user = 'zyf'
+            //TODO创建时间应为后台入库时间
+            this.ruleForm_b.createTime = new Date()
+            console.log(this.ruleForm_b)
+        },
+        scrollLoad(){
+            let scrollHeight= document.documentElement.scrollHeight || document.body.scrollHeight; //document的滚动高度
+            let nowScotop = document.documentElement.clientHeight || document.body.clientHeight;  //可视区高度
+            let wheight= document.documentElement.scrollTop || document.body.scrollTop; //已滚动高度
+            if (nowScotop >= scrollHeight - wheight - 5 ) {
+                if(this.currentPage < this.totalPage){
+                    this.currentPage++
+                    // this.getData(this.categoryId) //加载列表的请求方法
+                    this.loadData()
 
-        },
-        init() {
-            var mySelf = this;
-            window.myPalette = MAKE(
-                go.Palette,
-                "chart-palette", // must name or refer to the DIV HTML element
-                {
-                    scrollsPageOnFocus: false,
-                    nodeTemplateMap: mySelf.myDiagram.nodeTemplateMap, // share the templates used by myDiagram
-                    model: new go.GraphLinksModel([
-                        // specify the contents of the Palette
-                        {
-                            category: "Next",
-                            text: "新规则"
-                        }
-                    ])
                 }
-            );
+            }
         },
+        loadData() {
+            let data = this.tableData.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize)
+            this.tableDataNow = this.tableDataNow.concat(data)
+            console.log(this.currentPage)
+        },
+        tableListener() {
+            let dom = document.querySelector(".el-table__body-wrapper")
+            dom.addEventListener("scroll", () => {
+                const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight
+                if (scrollDistance <= 0) {//等于0证明已经到底，可以请求接口
+                    if (this.currentPage < this.totalPage) {//当前页数小于总页数就请求
+                        this.loading = true
+                        this.currentPage++;//当前页数自增
+                        //请求接口的代码
+                        this.loadData()
+                    }
+                }
+            })
+        },
+        addSys() {
+            this.dialogVisible_c = true
+        },
+        querySys() {
+            this.dialogVisible_a = true
+        },
+        resetForm(formName) {
+            this.$refs[formName].resetFields();
+        },
+        query() {
+            //TODO axios
+            this.dialogVisible_a = false
+            this.dialogVisible_b = true
+        },
+        browseThis(row) {
+
+        }
     }
 }
 </script>
 <style lang="scss" scoped>
-    #form-wrap {
-        padding: 20px 40px;
-        // background-color: white;
-        border: solid 1px rgb(244, 244, 244);
-    }
- 
-    #submit {
-        width: 102px;
-        height: 40px;
-        float: right;
-        margin: 20px 5px 16px 0;
-    }
- 
-    #chart-wrap {
+    .make {
         width: 100%;
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 22px;
- 
-        #chart-palette {
-            width: 180px;
-            margin-right: 30px;
-            background-color: white;
-            border: solid 1px rgb(244, 244, 244);
+        .button {
+            width: 100%;
+            box-sizing: border-box;
+            padding-top: 20px;
+            padding-left: 100px;
+            padding-right: 100px;
+            .buttonClass {
+                height: 40.4px;
+            }
         }
- 
-        #chart-diagram {
-            flex-grow: 1;
-            height: 720px;
-            background-color: white;
-            border: solid 1px rgb(244, 244, 244);
+        .systemList {
+            width: 100%;
+            box-sizing: border-box;
+            padding-top: 20px;
+            padding-left: 100px;
+            padding-right: 100px;
         }
-    }
- 
-    #lateEntry {
-        clear: both;
-        background-color: rgb(255, 255, 255);
-        border: solid 1px rgb(244, 244, 244);
- 
-        >span {
-            display: inline-block;
-            height: 50px;
-            font-size: 16px;
-            line-height: 50px;
-            text-indent: 30px;
-            letter-spacing: 0.8px;
-            text-align: left;
-            color: rgb(35, 35, 35);
-            // border-bottom: 1px solid rgb(234, 234, 234);
+        .listHeight {
+            height: 450px;
+            margin-bottom: 50px;
+        }
+        .buttomMargin {
+            margin-left: 50px;
+        }
+        .form {
+            width: 90%;
         }
     }
 </style>

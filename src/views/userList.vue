@@ -9,37 +9,37 @@
                 fixed
                 prop="id"
                 label="Id"
-                width="70"
+                min-width="70"
             >
             </el-table-column>
             <el-table-column
                 fixed
                 prop="name"
                 label="用户名称"
-                width="200"
+                min-width="200"
             >
             </el-table-column>
             <el-table-column
                 prop="role"
                 label="用户角色"
-                width="200"
+                min-width="200"
             >
             </el-table-column>
             <el-table-column
                 prop="now"
                 label="用户状态"
-                width="120"
+                min-width="120"
             >
             </el-table-column>
             <el-table-column
                 prop="desc"
                 label="用户备注"
-                width="636"
+                min-width="300"
             >
             </el-table-column>
             <el-table-column
                 label="操作"
-                width="100"
+                min-width="300"
                 fixed="right"
             >
                 <template #default="scope">

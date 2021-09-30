@@ -7,6 +7,9 @@ import AddUser from '@/views/addUser'
 import UserList from '@/views/userList'
 import AddTest from '@/views/addTest'
 import DataMan from '@/views/dataMan'
+import ProEval from '@/views/proEval'
+import ResultAnalysis from '@/views/resultAnalysis'
+import DataPre from '@/views/dataPre'
 
 const routes = [
   {
@@ -44,6 +47,18 @@ const routes = [
   {
     path: '/dataMan',
     component: DataMan
+  },
+  {
+    path: '/proEval',
+    component: ProEval
+  },
+  {
+    path: '/resultAnalysis',
+    component: ResultAnalysis
+  },
+  {
+    path: '/dataPre',
+    component: DataPre
   },
 ]
 

@@ -25,7 +25,8 @@ const menu = [
         content: [
             {
                 id: 1,
-                name: '数据预处理'
+                name: '数据预处理',
+                path: '/datapre'
             },
             {
                 id: 2,
@@ -55,20 +56,14 @@ const menu = [
             },
             {
                 id: 2,
-                name: '数据筛选'
+                name: '方案评估',
+                path: '/proEval'
             },
             {
                 id: 3,
-                name: '数据分析'
-            },
-            {
-                id: 4,
-                name: '数据可视化'
-            },
-            {
-                id: 5,
-                name: '数据分析工具'
-            },
+                name: '结果分析',
+                path: '/resultAnalysis'
+            }
         ]
     },{
         name: '知识平台',

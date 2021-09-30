@@ -61,8 +61,8 @@ export default {
         width: 100%;
         .header {
             width: 100%;
-            padding-right: 40px;
-            padding-left: 40px;
+            padding-right: 80px;
+            padding-left: 80px;
             padding-top: 20px;
             box-sizing: border-box;
             display: flex;
@@ -74,7 +74,7 @@ export default {
                 .testname {
                     width: 70px;
                     font-size: 15px;
-                    margin-right: 10px;
+                    margin-right: 5px;
                     line-height: 40px;
                 }
                 .input {
