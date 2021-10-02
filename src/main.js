@@ -12,6 +12,8 @@ import './assets/fonts/iconfont.js'
 import './assets/fonts/iconfont.css'
 import '@/assets/scss/index.scss'
 import VueContextMenu from 'vue-contextmenu'
+import * as echarts from 'echarts'
+
 // 接口拦截
 axios.interceptors.response.use((response) => {
     let res = response.data;
@@ -51,4 +53,6 @@ axios.interceptors.response.use((response) => {
   //     })
   //   }
   // })
-createApp(App).use(store).use(VueContextMenu).use(router).use(VueAxios, axios).use(ElementPlus).directive('loading', loadingDirective).directive('no-result', noResultDirective).mount('#app')
+const app = createApp(App)
+app.config.globalProperties.$echarts = echarts
+app.use(store).use(VueContextMenu).use(router).use(VueAxios, axios).use(ElementPlus).directive('loading', loadingDirective).directive('no-result', noResultDirective).mount('#app')

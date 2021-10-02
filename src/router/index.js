@@ -10,6 +10,7 @@ import DataMan from '@/views/dataMan'
 import ProEval from '@/views/proEval'
 import ResultAnalysis from '@/views/resultAnalysis'
 import DataPre from '@/views/dataPre'
+import DataVisible from '@/views/dataVisible'
 
 const routes = [
   {
@@ -59,6 +60,10 @@ const routes = [
   {
     path: '/dataPre',
     component: DataPre
+  },
+  {
+    path: '/dataVisible',
+    component: DataVisible
   },
 ]
 

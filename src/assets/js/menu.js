@@ -38,7 +38,8 @@ const menu = [
             },
             {
                 id: 4,
-                name: '数据可视化'
+                name: '数据可视化',
+                path: '/dataVisible'
             },
             {
                 id: 5,
